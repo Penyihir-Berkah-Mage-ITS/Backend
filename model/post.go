@@ -6,7 +6,7 @@ import (
 )
 
 type Post struct {
-	ID         string    `gorm:"unique" json:"id"`
+	ID         string    `gorm:"primaryKey" json:"id"`
 	User       User      `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	UserID     uuid.UUID `gorm:"null" json:"user_id"`
 	Content    string    `json:"content"`

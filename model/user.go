@@ -6,15 +6,15 @@ import (
 )
 
 type User struct {
-	ID             uuid.UUID
-	Username       string `gorm:"unique" json:"username"`
-	Phone          string `gorm:"unique" json:"phone"`
-	Email          string `gorm:"unique" json:"email"`
-	Password       string `json:"password"`
-	ProfilePicture string `json:"profile_picture"`
-	AccountType    string `json:"account_type"`
-	Gender         string `json:"gender"`
-	IsVerified     bool   `gorm:"default:false" json:"is_verified"`
+	ID             uuid.UUID `gorm:"primaryKey" json:"id"`
+	Username       string    `gorm:"unique" json:"username"`
+	Phone          string    `gorm:"unique" json:"phone"`
+	Email          string    `gorm:"unique" json:"email"`
+	Password       string    `json:"password"`
+	ProfilePicture string    `json:"profile_picture"`
+	AccountType    string    `json:"account_type"`
+	Gender         string    `json:"gender"`
+	IsVerified     bool      `gorm:"default:false" json:"is_verified"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -31,4 +31,18 @@ type UserRegisterInput struct {
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
 	ProfilePicture string `json:"profile_picture"`
+}
+
+type UserEditInput struct {
+	Username string `json:"username"`
+	Phone    string `json:"phone"`
+	Gender   string `json:"gender"`
+}
+
+type UserEditProfilePicture struct {
+	ProfilePicture string `json:"profile_picture"`
+}
+
+type UserEditPassword struct {
+	Password string `json:"password"`
 }
