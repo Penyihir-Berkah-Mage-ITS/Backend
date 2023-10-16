@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Backend/controller"
 	"Backend/database"
 	"Backend/middleware"
 	"Backend/model"
@@ -39,6 +40,9 @@ func main() {
 	r := gin.Default()
 
 	r.Use(middleware.CORS())
+
+	controller.Register(db, r)
+	controller.Login(db, r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

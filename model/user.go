@@ -20,12 +20,12 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-type UserLogin struct {
+type UserLoginInput struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type UserRegister struct {
+type UserRegisterInput struct {
 	Username       string `json:"username"`
 	Password       string `json:"password"`
 	Gender         string `json:"gender"`
