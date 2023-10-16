@@ -2,6 +2,7 @@ package main
 
 import (
 	"Backend/database"
+	"Backend/middleware"
 	"Backend/model"
 	"fmt"
 	supabasestorageuploader "github.com/adityarizkyramadhan/supabase-storage-uploader"
@@ -36,6 +37,8 @@ func main() {
 	fmt.Println(db)
 
 	r := gin.Default()
+
+	r.Use(middleware.CORS())
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
