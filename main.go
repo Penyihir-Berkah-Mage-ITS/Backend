@@ -38,6 +38,7 @@ func main() {
 	controller.Profile(db, r)
 	controller.Home(db, r)
 	controller.Post(db, r)
+	controller.Comment(db, r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
