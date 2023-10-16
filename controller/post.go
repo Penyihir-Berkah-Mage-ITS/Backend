@@ -85,4 +85,73 @@ func Post(db *gorm.DB, q *gin.Engine) {
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success delete post", nil)
 	})
+
+	// user like post
+	r.POST("/:post_id/like", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		postID := c.Param("post_id")
+
+		var isExist model.UserLikePost
+		if err := db.Where("user_id = ? AND post_id = ?", id, postID).First(&isExist).Error; err == nil {
+			utils.HttpRespFailed(c, http.StatusConflict, "You've already liked this post")
+			return
+		}
+
+		var post model.Post
+		if err := db.Where("id = ?", postID).First(&post).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		userLikePost := model.UserLikePost{
+			UserID: id.(uuid.UUID),
+			PostID: post.ID,
+		}
+
+		post.Like += 1
+
+		if err := db.Create(&userLikePost).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if err := db.Save(&post).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success like post", post)
+	})
+
+	// user unlike post
+	r.DELETE("/:post_id/unlike", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		postID := c.Param("post_id")
+
+		var userLikePost model.UserLikePost
+		if err := db.Where("user_id = ? AND post_id = ?", id, postID).First(&userLikePost).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		if err := db.Where("user_id = ? AND post_id = ?", id, postID).Delete(&userLikePost).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		var post model.Post
+		if err := db.Where("id = ?", postID).First(&post).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		post.Like -= 1
+
+		if err := db.Save(&post).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike post", post)
+	})
 }

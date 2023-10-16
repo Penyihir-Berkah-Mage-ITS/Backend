@@ -34,6 +34,18 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		utils.HttpRespSuccess(c, http.StatusOK, "Success get comments", comments)
 	})
 
+	r.GET("/:post_id/:comment_id", middleware.Authorization(), func(c *gin.Context) {
+		commentID := c.Param("comment_id")
+
+		var comment model.Comment
+		if err := db.Where("id = ?", commentID).First(&comment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get comment", comment)
+	})
+
 	r.POST("/:post_id/comment", middleware.Authorization(), func(c *gin.Context) {
 		content := c.PostForm("content")
 
@@ -53,6 +65,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			UserID:     userID.(uuid.UUID),
 			Content:    content,
 			Attachment: uploadedAttachment,
+			Like:       0,
 			CreatedAt:  time.Now(),
 		}
 
@@ -86,5 +99,73 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		}
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success delete comment", comment)
+	})
+
+	// user like comment
+	r.POST("/:post_id/:comment_id/like", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		commentID := c.Param("comment_id")
+
+		var isExist model.UserLikeComment
+		if err := db.Where("user_id = ? AND comment_id = ?", id, commentID).First(&isExist).Error; err == nil {
+			utils.HttpRespFailed(c, http.StatusConflict, "You've already liked this comment")
+			return
+		}
+
+		var comment model.Comment
+		if err := db.Where("id = ?", commentID).First(&comment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		comment.Like += 1
+
+		userLikeComment := model.UserLikeComment{
+			UserID:    id.(uuid.UUID),
+			CommentID: comment.ID,
+		}
+
+		if err := db.Create(&userLikeComment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if err := db.Save(&comment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success like comment", comment)
+	})
+
+	r.DELETE("/:post_id/:comment_id/unlike", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		commentID := c.Param("comment_id")
+
+		var isExist model.UserLikeComment
+		if err := db.Where("user_id = ? AND comment_id = ?", id, commentID).First(&isExist).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusConflict, "You've already unliked this comment")
+			return
+		}
+
+		var comment model.Comment
+		if err := db.Where("id = ?", commentID).First(&comment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		comment.Like -= 1
+
+		if err := db.Where("user_id = ? AND comment_id = ?", id, commentID).Delete(&model.UserLikeComment{}).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if err := db.Save(&comment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike comment", comment)
 	})
 }
