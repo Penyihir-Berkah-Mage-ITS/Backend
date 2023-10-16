@@ -16,3 +16,8 @@ type Post struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+type PostInput struct {
+	Content    string `json:"content"`
+	Attachment string `json:"attachment"`
+}
