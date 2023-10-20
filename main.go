@@ -27,8 +27,6 @@ func main() {
 		panic(err.Error())
 	}
 
-	fmt.Println(db)
-
 	r := gin.Default()
 
 	r.Use(middleware.CORS())
@@ -39,6 +37,7 @@ func main() {
 	controller.Home(db, r)
 	controller.Post(db, r)
 	controller.Comment(db, r)
+	controller.Report(db, r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

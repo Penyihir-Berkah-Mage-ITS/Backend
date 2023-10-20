@@ -26,6 +26,7 @@ func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
 		&model.Comment{},
 		&model.UserLikePost{},
 		&model.UserLikeComment{},
+		&model.Report{},
 	); err != nil {
 		return nil, err
 	}
