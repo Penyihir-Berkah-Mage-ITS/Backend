@@ -10,6 +10,7 @@ type Report struct {
 	Address      string    `gorm:"notNull" json:"address"`
 	Province     string    `gorm:"notNull" json:"province"`
 	City         string    `gorm:"notNull" json:"city"`
+	Phone        string    `gorm:"notNull" json:"phone"`
 	DetailReport string    `gorm:"notNull" json:"detail_report"`
 	Proof        string    `json:"proof"`
 }

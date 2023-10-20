@@ -27,6 +27,7 @@ func Report(db *gorm.DB, q *gin.Engine) {
 		address := c.PostForm("address")
 		province := c.PostForm("province")
 		city := c.PostForm("city")
+		phone := c.PostForm("phone")
 		detailReport := c.PostForm("detail_report")
 		proof, _ := c.FormFile("proof")
 		uploadedProof, err := supClient.Upload(proof)
@@ -42,6 +43,7 @@ func Report(db *gorm.DB, q *gin.Engine) {
 			Address:      address,
 			Province:     province,
 			City:         city,
+			Phone:        phone,
 			DetailReport: detailReport,
 			Proof:        uploadedProof,
 		}
