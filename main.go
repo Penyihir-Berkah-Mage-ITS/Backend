@@ -2,6 +2,7 @@ package main
 
 import (
 	"Backend/controller"
+	"Backend/controller/websocket"
 	"Backend/database"
 	"Backend/middleware"
 	"fmt"
@@ -27,6 +28,10 @@ func main() {
 		panic(err.Error())
 	}
 
+	hub := websocket.NewHub()
+	wsHandler := websocket.NewHandler(hub)
+	go hub.Run()
+
 	r := gin.Default()
 
 	r.Use(middleware.CORS())
@@ -38,6 +43,11 @@ func main() {
 	controller.Post(db, r)
 	controller.Comment(db, r)
 	controller.Report(db, r)
+
+	r.POST("/ws/createRoom", wsHandler.CreateRoom)
+	r.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
+	r.GET("/ws/getRooms", wsHandler.GetRooms)
+	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
