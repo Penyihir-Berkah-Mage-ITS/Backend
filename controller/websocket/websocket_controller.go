@@ -65,7 +65,7 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 	}
 
 	m := &Message{
-		Content:  "A new user has joined the room",
+		Content:  username + " has joined the room",
 		RoomID:   roomID,
 		Username: username,
 	}

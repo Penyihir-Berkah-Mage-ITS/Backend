@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -61,8 +62,14 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 	})
 
 	r.POST("/edit-profile-picture", middleware.Authorization(), func(c *gin.Context) {
+		randomID := utils.GenerateStringID()
+
 		picture, _ := c.FormFile("picture")
-		uploaded, err := supClient.Upload(picture)
+		filename := strings.ReplaceAll(strings.TrimSpace(picture.Filename), " ", "")
+		newFilename := randomID + "_" + filename
+		picture.Filename = newFilename
+
+		_, err := supClient.Upload(picture)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -75,7 +82,7 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		user.ProfilePicture = uploaded
+		user.ProfilePicture = newFilename
 		user.UpdatedAt = time.Now()
 
 		if err := db.Save(&user).Error; err != nil {
