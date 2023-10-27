@@ -21,4 +21,5 @@
 go.work
 
 requirements.txt
+.env
 .env.example2
