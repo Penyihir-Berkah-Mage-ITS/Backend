@@ -100,7 +100,17 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		hashed, err := utils.Hash(userEditPassword.Password)
+		if !utils.CompareHash(userEditPassword.OldPassword, user.Password) {
+			utils.HttpRespFailed(c, http.StatusUnauthorized, "Password is wrong")
+			return
+		}
+
+		if userEditPassword.NewPassword != userEditPassword.ConfirmNewPassword {
+			utils.HttpRespFailed(c, http.StatusUnauthorized, "Confirm password is wrong")
+			return
+		}
+
+		hashed, err := utils.Hash(userEditPassword.NewPassword)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
