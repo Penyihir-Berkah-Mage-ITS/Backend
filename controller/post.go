@@ -10,7 +10,6 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -47,7 +46,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		id, _ := c.Get("id")
 
 		newPost := model.Post{
-			ID:         strconv.FormatInt(utils.GenerateID(), 10),
+			ID:         utils.GenerateStringID(),
 			UserID:     id.(uuid.UUID),
 			Content:    content,
 			Attachment: uploadedAttachment,

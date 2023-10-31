@@ -10,7 +10,6 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -60,7 +59,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		postID := c.Param("post_id")
 
 		newComment := model.Comment{
-			ID:         strconv.FormatInt(utils.GenerateID(), 10),
+			ID:         utils.GenerateStringID(),
 			PostID:     postID,
 			UserID:     userID.(uuid.UUID),
 			Content:    content,
