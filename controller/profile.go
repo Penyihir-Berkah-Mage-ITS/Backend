@@ -69,7 +69,7 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 		newFilename := randomID + "_" + filename
 		picture.Filename = newFilename
 
-		_, err := supClient.Upload(picture)
+		photoLink, err := supClient.Upload(picture)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -82,7 +82,7 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		user.ProfilePicture = newFilename
+		user.ProfilePicture = photoLink
 		user.UpdatedAt = time.Now()
 
 		if err := db.Save(&user).Error; err != nil {

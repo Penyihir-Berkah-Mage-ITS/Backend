@@ -34,10 +34,10 @@ func Report(db *gorm.DB, q *gin.Engine) {
 		proof, _ := c.FormFile("proof")
 
 		filename := strings.ReplaceAll(strings.TrimSpace(proof.Filename), " ", "")
-		newFilename := randomID + "_" + filename
+		newFilename := randomID + "%20" + filename
 		proof.Filename = newFilename
 
-		_, err := supClient.Upload(proof)
+		photoLink, err := supClient.Upload(proof)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -52,7 +52,7 @@ func Report(db *gorm.DB, q *gin.Engine) {
 			City:         city,
 			Phone:        phone,
 			DetailReport: detailReport,
-			Proof:        newFilename,
+			Proof:        photoLink,
 		}
 
 		if err := db.Create(&newReport).Error; err != nil {

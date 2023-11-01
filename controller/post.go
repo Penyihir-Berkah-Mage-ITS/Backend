@@ -44,7 +44,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		newFilename := randomID + "_" + filename
 		attachment.Filename = newFilename
 
-		_, err := supClient.Upload(attachment)
+		photoLink, err := supClient.Upload(attachment)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -56,7 +56,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			ID:         utils.GenerateStringID(),
 			UserID:     id.(uuid.UUID),
 			Content:    content,
-			Attachment: newFilename,
+			Attachment: photoLink,
 			Like:       0,
 			CreatedAt:  time.Now(),
 		}
