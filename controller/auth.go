@@ -30,7 +30,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 		newUser := model.User{
 			ID:             uuid.New(),
 			Username:       userRegister.Username,
-			Phone:          "",
+			Phone:          userRegister.Phone,
 			Email:          userRegister.Email,
 			Password:       hashed,
 			ProfilePicture: userRegister.ProfilePicture,

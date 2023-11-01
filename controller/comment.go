@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -46,10 +47,16 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 	})
 
 	r.POST("/:post_id/comment", middleware.Authorization(), func(c *gin.Context) {
+		randomID := utils.GenerateStringID()
+
 		content := c.PostForm("content")
 
 		attachment, _ := c.FormFile("attachment")
-		uploadedAttachment, err := supClient.Upload(attachment)
+		filename := strings.ReplaceAll(strings.TrimSpace(attachment.Filename), " ", "")
+		newFilename := randomID + "_" + filename
+		attachment.Filename = newFilename
+
+		_, err := supClient.Upload(attachment)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -63,7 +70,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			PostID:     postID,
 			UserID:     userID.(uuid.UUID),
 			Content:    content,
-			Attachment: uploadedAttachment,
+			Attachment: newFilename,
 			Like:       0,
 			CreatedAt:  time.Now(),
 		}

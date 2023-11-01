@@ -30,6 +30,7 @@ type UserRegisterInput struct {
 	Password       string `json:"password"`
 	Gender         string `json:"gender"`
 	Email          string `json:"email"`
+	Phone          string `json:"phone"`
 	ProfilePicture string `json:"profile_picture"`
 }
 

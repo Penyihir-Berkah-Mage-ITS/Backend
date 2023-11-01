@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func Report(db *gorm.DB, q *gin.Engine) {
@@ -22,6 +23,7 @@ func Report(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/v1/report")
 	r.POST("/create", middleware.Authorization(), func(c *gin.Context) {
 		id, _ := c.Get("id")
+		randomID := utils.GenerateStringID()
 
 		name := c.PostForm("name")
 		address := c.PostForm("address")
@@ -30,7 +32,12 @@ func Report(db *gorm.DB, q *gin.Engine) {
 		phone := c.PostForm("phone")
 		detailReport := c.PostForm("detail_report")
 		proof, _ := c.FormFile("proof")
-		uploadedProof, err := supClient.Upload(proof)
+
+		filename := strings.ReplaceAll(strings.TrimSpace(proof.Filename), " ", "")
+		newFilename := randomID + "_" + filename
+		proof.Filename = newFilename
+
+		_, err := supClient.Upload(proof)
 		if err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
@@ -45,7 +52,7 @@ func Report(db *gorm.DB, q *gin.Engine) {
 			City:         city,
 			Phone:        phone,
 			DetailReport: detailReport,
-			Proof:        uploadedProof,
+			Proof:        newFilename,
 		}
 
 		if err := db.Create(&newReport).Error; err != nil {
