@@ -38,6 +38,7 @@ func main() {
 
 	controller.Register(db, r)
 	controller.Login(db, r)
+	controller.Verify(db, r)
 	controller.Profile(db, r)
 	controller.Home(db, r)
 	controller.Post(db, r)
