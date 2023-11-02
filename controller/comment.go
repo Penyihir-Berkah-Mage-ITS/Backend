@@ -107,6 +107,20 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		utils.HttpRespSuccess(c, http.StatusOK, "Success delete comment", comment)
 	})
 
+	// user like status
+	r.GET("/:post_id/:comment_id/likestatus", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		commentID := c.Param("comment_id")
+
+		var isExist model.UserLikeComment
+		if err := db.Where("user_id = ? AND comment_id = ?", id, commentID).First(&isExist).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Boolean", isExist)
+	})
+
 	// user like comment
 	r.POST("/:post_id/:comment_id/like", middleware.Authorization(), func(c *gin.Context) {
 		id, _ := c.Get("id")

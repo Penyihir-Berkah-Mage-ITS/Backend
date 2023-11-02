@@ -92,6 +92,20 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		utils.HttpRespSuccess(c, http.StatusOK, "Success delete post", nil)
 	})
 
+	// user like status
+	r.GET("/:post_id/likestatus", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
+		postID := c.Param("post_id")
+
+		var isExist model.UserLikePost
+		if err := db.Where("user_id = ? AND post_id = ?", id, postID).First(&isExist).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Boolean", isExist)
+	})
+
 	// user like post
 	r.POST("/:post_id/like", middleware.Authorization(), func(c *gin.Context) {
 		id, _ := c.Get("id")
