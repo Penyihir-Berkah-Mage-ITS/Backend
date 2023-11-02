@@ -33,7 +33,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			Phone:          userRegister.Phone,
 			Email:          userRegister.Email,
 			Password:       hashed,
-			ProfilePicture: userRegister.ProfilePicture,
+			ProfilePicture: utils.DefaultAvatar(userRegister.ProfilePicture),
 			AccountType:    "ASA Peeps",
 			Gender:         userRegister.Gender,
 			IsVerified:     false,
