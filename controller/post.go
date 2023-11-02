@@ -35,8 +35,20 @@ func Post(db *gorm.DB, q *gin.Engine) {
 	})
 
 	r.POST("/create", middleware.Authorization(), func(c *gin.Context) {
-		randomID := utils.GenerateStringID()
+		latitudeStr := c.Query("lat")
+		longitudeStr := c.Query("lng")
+		latitude, err := utils.StringToFloat64(latitudeStr)
+		if err != nil {
+			utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		longitude, err := utils.StringToFloat64(longitudeStr)
+		if err != nil {
+			utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
 
+		randomID := utils.GenerateStringID()
 		content := c.PostForm("content")
 
 		attachment, _ := c.FormFile("attachment")
@@ -58,6 +70,8 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			Content:    content,
 			Attachment: photoLink,
 			Like:       0,
+			Latitude:   latitude,
+			Longitude:  longitude,
 			CreatedAt:  time.Now(),
 		}
 
