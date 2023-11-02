@@ -7,15 +7,30 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 func Home(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/v1/home")
-	r.GET("/", middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/nearest", middleware.Authorization(), func(c *gin.Context) {
+		latitudeStr := c.Query("lat")
+		longitudeStr := c.Query("lng")
+
 		var posts []model.Post
-		if err := db.Find(&posts).Error; err != nil {
+		if err := db.Order("created_at desc").Find(&posts).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
+		}
+
+		for i := range posts {
+			distance := utils.LocationToKM(
+				c,
+				latitudeStr,
+				longitudeStr,
+				strconv.FormatFloat(posts[i].Latitude, 'f', -1, 64),
+				strconv.FormatFloat(posts[i].Longitude, 'f', -1, 64),
+			)
+			posts[i].Distance = distance
 		}
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", posts)

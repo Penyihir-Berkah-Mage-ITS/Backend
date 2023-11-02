@@ -12,6 +12,9 @@ type Post struct {
 	Content    string    `json:"content"`
 	Attachment string    `json:"attachment"`
 	Like       int64     `json:"like"`
+	Latitude   float64   `json:"latitude"`
+	Longitude  float64   `json:"longitude"`
+	Distance   string    `json:"distance"`
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
