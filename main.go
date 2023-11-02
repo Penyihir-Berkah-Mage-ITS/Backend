@@ -44,11 +44,7 @@ func main() {
 	controller.Post(db, r)
 	controller.Comment(db, r)
 	controller.Report(db, r)
-
-	r.POST("/ws/createRoom", wsHandler.CreateRoom)
-	r.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
-	r.GET("/ws/getRooms", wsHandler.GetRooms)
-	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
+	websocket.WebSocketInit(r, wsHandler)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
