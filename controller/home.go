@@ -17,42 +17,125 @@ func Home(db *gorm.DB, q *gin.Engine) {
 		longitudeStr := c.Query("lng")
 
 		var posts []model.Post
-		if err := db.Order("created_at desc").Find(&posts).Error; err != nil {
+		if err := db.Preload("User").Order("created_at desc").Find(&posts).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		for i := range posts {
+		var postsResponse []model.PostResponse
+
+		for _, post := range posts {
 			distance := utils.LocationToKM(
 				c,
 				latitudeStr,
 				longitudeStr,
-				strconv.FormatFloat(posts[i].Latitude, 'f', -1, 64),
-				strconv.FormatFloat(posts[i].Longitude, 'f', -1, 64),
+				strconv.FormatFloat(post.Latitude, 'f', -1, 64),
+				strconv.FormatFloat(post.Longitude, 'f', -1, 64),
 			)
-			posts[i].Distance = distance
+
+			postResponse := model.PostResponse{
+				ID:         post.ID,
+				User:       post.User,
+				UserID:     post.UserID,
+				Content:    post.Content,
+				Attachment: post.Attachment,
+				Likes:      post.Likes,
+				Latitude:   post.Latitude,
+				Longitude:  post.Longitude,
+				Distance:   distance,
+				CreatedAt:  post.CreatedAt,
+				UpdatedAt:  post.UpdatedAt,
+			}
+
+			id, _ := c.Get("id")
+			var like model.UserLikePost
+			if err := db.Where("user_id = ? AND post_id = ?", id, post.ID).First(&like).Error; err != nil {
+				postResponse.IsLiked = false
+			} else {
+				postResponse.IsLiked = true
+			}
+
+			postsResponse = append(postsResponse, postResponse)
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", posts)
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", postsResponse)
 	})
 
 	r.GET("/popular", middleware.Authorization(), func(c *gin.Context) {
 		var posts []model.Post
-		if err := db.Order("\"like\" DESC").Find(&posts).Error; err != nil {
+
+		if err := db.Preload("User").Order("likes desc").Find(&posts).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", posts)
+		var postsResponse []model.PostResponse
+
+		for _, post := range posts {
+			postResponse := model.PostResponse{
+				ID:         post.ID,
+				User:       post.User,
+				UserID:     post.UserID,
+				Content:    post.Content,
+				Attachment: post.Attachment,
+				Likes:      post.Likes,
+				Latitude:   post.Latitude,
+				Longitude:  post.Longitude,
+				Distance:   post.Distance,
+				CreatedAt:  post.CreatedAt,
+				UpdatedAt:  post.UpdatedAt,
+			}
+
+			id, _ := c.Get("id")
+			var like model.UserLikePost
+			if err := db.Where("user_id = ? AND post_id = ?", id, post.ID).First(&like).Error; err != nil {
+				postResponse.IsLiked = false
+			} else {
+				postResponse.IsLiked = true
+			}
+
+			postsResponse = append(postsResponse, postResponse)
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", postsResponse)
 	})
 
 	r.GET("/latest", middleware.Authorization(), func(c *gin.Context) {
 		var posts []model.Post
-		if err := db.Order("created_at desc").Find(&posts).Error; err != nil {
+
+		if err := db.Order("created_at desc").Preload("User").Find(&posts).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", posts)
+		var postsResponse []model.PostResponse
+
+		for _, post := range posts {
+			postResponse := model.PostResponse{
+				ID:         post.ID,
+				User:       post.User,
+				UserID:     post.UserID,
+				Content:    post.Content,
+				Attachment: post.Attachment,
+				Likes:      post.Likes,
+				Latitude:   post.Latitude,
+				Longitude:  post.Longitude,
+				Distance:   post.Distance,
+				CreatedAt:  post.CreatedAt,
+				UpdatedAt:  post.UpdatedAt,
+			}
+
+			id, _ := c.Get("id")
+			var like model.UserLikePost
+			if err := db.Where("user_id = ? AND post_id = ?", id, post.ID).First(&like).Error; err != nil {
+				postResponse.IsLiked = false
+			} else {
+				postResponse.IsLiked = true
+			}
+
+			postsResponse = append(postsResponse, postResponse)
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get all posts", postsResponse)
 	})
 }

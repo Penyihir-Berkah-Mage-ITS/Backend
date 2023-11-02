@@ -69,7 +69,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			UserID:     id.(uuid.UUID),
 			Content:    content,
 			Attachment: photoLink,
-			Like:       0,
+			Likes:      0,
 			Latitude:   latitude,
 			Longitude:  longitude,
 			CreatedAt:  time.Now(),
@@ -142,7 +142,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			PostID: post.ID,
 		}
 
-		post.Like += 1
+		post.Likes += 1
 
 		if err := db.Create(&userLikePost).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
@@ -179,7 +179,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		post.Like -= 1
+		post.Likes -= 1
 
 		if err := db.Save(&post).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
