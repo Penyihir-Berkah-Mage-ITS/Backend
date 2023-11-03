@@ -1,3 +1,9 @@
+buildlatest:
+	docker build -t mage-be:latest .
+
+runlatest:
+	docker run -p 8080:8080 mage-be:latest
+
 postgresinit:
 	docker run --name postgres15 -p 5433:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=password -d postgres:15-alpine
 
@@ -22,4 +28,4 @@ migratedown:
 gorun:
 	go run main.go
 
-.PHONY: postgresinit postgresstart postgres createdb dropdb migrateup migratedown gorun
+.PHONY: buildlatest runlatest postgresinit postgresstart postgres createdb dropdb migrateup migratedown gorun
