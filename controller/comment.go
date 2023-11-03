@@ -22,7 +22,31 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success get comments", comments)
+		var commentsResponse []model.CommentResponse
+		for _, comment := range comments {
+			commentResponse := model.CommentResponse{
+				ID:        comment.ID,
+				UserID:    comment.UserID,
+				PostID:    comment.PostID,
+				Content:   comment.Content,
+				Like:      comment.Like,
+				CreatedAt: comment.CreatedAt,
+				UpdatedAt: comment.UpdatedAt,
+			}
+
+			id, _ := c.Get("id")
+
+			var isExist model.UserLikeComment
+			if err := db.Where("user_id = ? AND comment_id = ?", id, comment.ID).First(&isExist).Error; err != nil {
+				commentResponse.IsLiked = false
+			} else {
+				commentResponse.IsLiked = true
+			}
+
+			commentsResponse = append(commentsResponse, commentResponse)
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get comments", commentsResponse)
 	})
 
 	r.GET("/:post_id/:comment_id", middleware.Authorization(), func(c *gin.Context) {
@@ -170,7 +194,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike comment", comment)
 	})
 
-	// get total likes from post
+	// get total comment from post
 	r.GET("/:post_id/totalcomment", middleware.Authorization(), func(c *gin.Context) {
 		postID := c.Param("post_id")
 		var commentsCount int64

@@ -55,6 +55,14 @@ func Home(db *gorm.DB, q *gin.Engine) {
 				postResponse.IsLiked = true
 			}
 
+			var totalComment int64
+			if err := db.Table("comments").Where("post_id = ?", post.ID).Count(&totalComment).Error; err != nil {
+				utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+				return
+			}
+
+			postResponse.TotalComment = totalComment
+
 			postsResponse = append(postsResponse, postResponse)
 		}
 
@@ -94,6 +102,14 @@ func Home(db *gorm.DB, q *gin.Engine) {
 				postResponse.IsLiked = true
 			}
 
+			var totalComment int64
+			if err := db.Table("comments").Where("post_id = ?", post.ID).Count(&totalComment).Error; err != nil {
+				utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+				return
+			}
+
+			postResponse.TotalComment = totalComment
+
 			postsResponse = append(postsResponse, postResponse)
 		}
 
@@ -132,6 +148,14 @@ func Home(db *gorm.DB, q *gin.Engine) {
 			} else {
 				postResponse.IsLiked = true
 			}
+
+			var totalComment int64
+			if err := db.Table("comments").Where("post_id = ?", post.ID).Count(&totalComment).Error; err != nil {
+				utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+				return
+			}
+
+			postResponse.TotalComment = totalComment
 
 			postsResponse = append(postsResponse, postResponse)
 		}
