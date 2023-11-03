@@ -137,7 +137,7 @@ func Verify(db *gorm.DB, q *gin.Engine) {
 func sendVerificationEmail(userID string, userEmail string) {
 	auth := smtp.PlainAuth("", os.Getenv("SMTP_EMAIL"), os.Getenv("SMTP_EMAIL_PASSWORD"), os.Getenv("SMTP_HOST"))
 
-	verifyLink := os.Getenv("HOST") + "/api/v1/" + userID + "/verify"
+	verifyLink := os.Getenv("BASE_URL") + "/api/v1/" + userID + "/verify"
 
 	message := fmt.Sprintf(
 		"From: %s\r\nTo: %s\r\nSubject: Account Verification\r\n\r\n"+
