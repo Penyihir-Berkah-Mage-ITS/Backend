@@ -45,6 +45,7 @@ func main() {
 	controller.Comment(db, r)
 	controller.Report(db, r)
 	websocket.WebSocketInit(r, wsHandler)
+	controller.Chat(db, r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

@@ -4,23 +4,14 @@ import (
 	"Backend/middleware"
 	"Backend/model"
 	"Backend/utils"
-	supabasestorageuploader "github.com/adityarizkyramadhan/supabase-storage-uploader"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
-	"os"
-	"strings"
 	"time"
 )
 
 func Comment(db *gorm.DB, q *gin.Engine) {
-	supClient := supabasestorageuploader.New(
-		os.Getenv("SUPABASE_PROJECT_URL"),
-		os.Getenv("SUPABASE_PROJECT_API_KEY"),
-		os.Getenv("SUPABASE_PROJECT_STORAGE_NAME"),
-	)
-
 	r := q.Group("/api/v1/post")
 	r.GET("/:post_id/comment", middleware.Authorization(), func(c *gin.Context) {
 		postID := c.Param("post_id")
@@ -47,18 +38,9 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 	})
 
 	r.POST("/:post_id/comment", middleware.Authorization(), func(c *gin.Context) {
-		randomID := utils.GenerateStringID()
-
-		content := c.PostForm("content")
-
-		attachment, _ := c.FormFile("attachment")
-		filename := strings.ReplaceAll(strings.TrimSpace(attachment.Filename), " ", "")
-		newFilename := randomID + "_" + filename
-		attachment.Filename = newFilename
-
-		photoLink, err := supClient.Upload(attachment)
-		if err != nil {
-			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+		var commentInput model.CommentInput
+		if err := c.BindJSON(&commentInput); err != nil {
+			utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
@@ -66,13 +48,12 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		postID := c.Param("post_id")
 
 		newComment := model.Comment{
-			ID:         utils.GenerateStringID(),
-			PostID:     postID,
-			UserID:     userID.(uuid.UUID),
-			Content:    content,
-			Attachment: photoLink,
-			Like:       0,
-			CreatedAt:  time.Now(),
+			ID:        utils.GenerateStringID(),
+			PostID:    postID,
+			UserID:    userID.(uuid.UUID),
+			Content:   commentInput.Content,
+			Like:      0,
+			CreatedAt: time.Now(),
 		}
 
 		if err := db.Create(&newComment).Error; err != nil {
@@ -187,5 +168,18 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		}
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike comment", comment)
+	})
+
+	// get total likes from post
+	r.GET("/:post_id/totalcomment", middleware.Authorization(), func(c *gin.Context) {
+		postID := c.Param("post_id")
+		var commentsCount int64
+
+		if err := db.Table("comments").Where("post_id = ?", postID).Count(&commentsCount).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success get total comments", commentsCount)
 	})
 }
