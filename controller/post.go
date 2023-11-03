@@ -153,7 +153,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var post model.Post
-		if err := db.Where("id = ?", postID).First(&post).Error; err != nil {
+		if err := db.Preload("User").Where("id = ?", postID).First(&post).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
@@ -216,7 +216,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var post model.Post
-		if err := db.Where("id = ?", postID).First(&post).Error; err != nil {
+		if err := db.Preload("User").Where("id = ?", postID).First(&post).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}

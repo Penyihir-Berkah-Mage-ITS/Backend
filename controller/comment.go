@@ -139,7 +139,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var comment model.Comment
-		if err := db.Where("id = ?", commentID).First(&comment).Error; err != nil {
+		if err := db.Preload("User").Where("id = ?", commentID).First(&comment).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
@@ -195,7 +195,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var comment model.Comment
-		if err := db.Where("id = ?", commentID).First(&comment).Error; err != nil {
+		if err := db.Preload("User").Where("id = ?", commentID).First(&comment).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
