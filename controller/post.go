@@ -154,7 +154,28 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success like post", post)
+		var totalComment int64
+		if err := db.Table("comments").Where("post_id = ?", post.ID).Count(&totalComment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		postResponse := model.PostResponse{
+			ID:           post.ID,
+			User:         post.User,
+			UserID:       post.UserID,
+			Content:      post.Content,
+			Attachment:   post.Attachment,
+			Likes:        post.Likes,
+			Latitude:     post.Latitude,
+			Longitude:    post.Longitude,
+			Distance:     post.Distance,
+			IsLiked:      true,
+			TotalComment: totalComment,
+			CreatedAt:    time.Now(),
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success like post", postResponse)
 	})
 
 	// user unlike post
@@ -186,6 +207,27 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike post", post)
+		var totalComment int64
+		if err := db.Table("comments").Where("post_id = ?", post.ID).Count(&totalComment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		postResponse := model.PostResponse{
+			ID:           post.ID,
+			User:         post.User,
+			UserID:       post.UserID,
+			Content:      post.Content,
+			Attachment:   post.Attachment,
+			Likes:        post.Likes,
+			Latitude:     post.Latitude,
+			Longitude:    post.Longitude,
+			Distance:     post.Distance,
+			IsLiked:      false,
+			TotalComment: totalComment,
+			CreatedAt:    time.Now(),
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike post", postResponse)
 	})
 }

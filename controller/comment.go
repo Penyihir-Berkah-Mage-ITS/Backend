@@ -161,7 +161,27 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success like comment", comment)
+		postID := c.Param("post_id")
+
+		var totalComment int64
+		if err := db.Table("comments").Where("post_id = ?", postID).Count(&totalComment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		commentResponse := model.CommentResponse{
+			ID:           comment.ID,
+			UserID:       comment.UserID,
+			User:         comment.User,
+			PostID:       comment.PostID,
+			Content:      comment.Content,
+			Like:         comment.Like,
+			IsLiked:      true,
+			TotalComment: totalComment,
+			CreatedAt:    comment.CreatedAt,
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success like comment", commentResponse)
 	})
 
 	r.DELETE("/:post_id/:comment_id/unlike", middleware.Authorization(), func(c *gin.Context) {
@@ -192,7 +212,27 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike comment", comment)
+		postID := c.Param("post_id")
+
+		var totalComment int64
+		if err := db.Table("comments").Where("post_id = ?", postID).Count(&totalComment).Error; err != nil {
+			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		commentResponse := model.CommentResponse{
+			ID:           comment.ID,
+			UserID:       comment.UserID,
+			User:         comment.User,
+			PostID:       comment.PostID,
+			Content:      comment.Content,
+			Like:         comment.Like,
+			IsLiked:      false,
+			TotalComment: totalComment,
+			CreatedAt:    comment.CreatedAt,
+		}
+
+		utils.HttpRespSuccess(c, http.StatusOK, "Success unlike comment", commentResponse)
 	})
 
 	// get total comment from post
