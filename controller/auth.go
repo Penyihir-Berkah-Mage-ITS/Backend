@@ -48,7 +48,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		//sendVerificationEmail(newUser.ID.String(), newUser.Email)
+		sendVerificationEmail(newUser.ID.String(), newUser.Email)
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success create new user", newUser)
 	})
@@ -135,24 +135,24 @@ func Verify(db *gorm.DB, q *gin.Engine) {
 }
 
 func sendVerificationEmail(userID string, userEmail string) {
-	auth := smtp.PlainAuth("", os.Getenv("SMTP_EMAIL"), os.Getenv("SMTP_EMAIL_PASSWORD"), "smtp.gmail.com")
+	auth := smtp.PlainAuth("", os.Getenv("SMTP_EMAIL"), os.Getenv("SMTP_EMAIL_PASSWORD"), os.Getenv("SMTP_HOST"))
 
 	verifyLink := os.Getenv("HOST") + "/api/v1/" + userID + "/verify"
 
 	message := fmt.Sprintf(
 		"From: %s\r\nTo: %s\r\nSubject: Account Verification\r\n\r\n"+
 			"Dear User,\r\n\r\n"+
-			"Thank you for creating an account. To verify your account, please click the link below:\r\n"+
-			"<a href='%s'>Verify Account</a>\r\n\r\n"+
+			"Thank you for creating an account. To verify your account, please visit the link below:\r\n"+
+			"%s\r\n\r\n"+
 			"If you didn't sign up for this account, please ignore this email.\r\n\r\n"+
 			"Best regards,\r\n"+
 			"%s",
-		os.Getenv("EMAIL"), userEmail, verifyLink, "ASA",
+		os.Getenv("SMTP_EMAIL"), userEmail, verifyLink, "ASA",
 	)
 
-	err := smtp.SendMail("smtp.gmail.com:587", auth, os.Getenv("EMAIL"), []string{userEmail}, []byte(message))
+	err := smtp.SendMail(os.Getenv("SMTP_HOST")+":"+os.Getenv("SMTP_PORT"), auth, os.Getenv("SMTP_EMAIL"), []string{userEmail}, []byte(message))
 	if err != nil {
 		log.Println("Error sending verification email:", err)
-		utils.HttpRespFailed(nil, http.StatusInternalServerError, err.Error())
+		//utils.HttpRespFailed(nil, http.StatusInternalServerError, err.Error())
 	}
 }
