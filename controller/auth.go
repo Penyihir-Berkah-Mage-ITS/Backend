@@ -48,7 +48,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		sendVerificationEmail(newUser.ID.String(), newUser.Email)
+		//sendVerificationEmail(newUser.ID.String(), newUser.Email)
 
 		utils.HttpRespSuccess(c, http.StatusOK, "Success create new user", newUser)
 	})
