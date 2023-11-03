@@ -17,7 +17,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 		postID := c.Param("post_id")
 
 		var comments []model.Comment
-		if err := db.Where("post_id = ?", postID).Find(&comments).Error; err != nil {
+		if err := db.Preload("User").Where("post_id = ?", postID).Find(&comments).Error; err != nil {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
@@ -27,6 +27,7 @@ func Comment(db *gorm.DB, q *gin.Engine) {
 			commentResponse := model.CommentResponse{
 				ID:        comment.ID,
 				UserID:    comment.UserID,
+				User:      comment.User,
 				PostID:    comment.PostID,
 				Content:   comment.Content,
 				Like:      comment.Like,
