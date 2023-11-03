@@ -35,6 +35,7 @@ func Post(db *gorm.DB, q *gin.Engine) {
 	})
 
 	r.POST("/create", middleware.Authorization(), func(c *gin.Context) {
+		id, _ := c.Get("id")
 		latitudeStr := c.Query("lat")
 		longitudeStr := c.Query("lng")
 		latitude, err := utils.StringToFloat64(latitudeStr)
@@ -52,6 +53,28 @@ func Post(db *gorm.DB, q *gin.Engine) {
 		content := c.PostForm("content")
 
 		attachment, _ := c.FormFile("attachment")
+
+		if attachment == nil {
+			newPost := model.Post{
+				ID:         utils.GenerateStringID(),
+				UserID:     id.(uuid.UUID),
+				Content:    content,
+				Attachment: "",
+				Likes:      0,
+				Latitude:   latitude,
+				Longitude:  longitude,
+				CreatedAt:  time.Now(),
+			}
+
+			if err := db.Create(&newPost).Error; err != nil {
+				utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			utils.HttpRespSuccess(c, http.StatusOK, "Success create post", newPost)
+			return
+		}
+
 		filename := strings.ReplaceAll(strings.TrimSpace(attachment.Filename), " ", "")
 		newFilename := randomID + "_" + filename
 		attachment.Filename = newFilename
@@ -61,8 +84,6 @@ func Post(db *gorm.DB, q *gin.Engine) {
 			utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
-
-		id, _ := c.Get("id")
 
 		newPost := model.Post{
 			ID:         utils.GenerateStringID(),

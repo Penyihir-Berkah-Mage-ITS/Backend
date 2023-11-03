@@ -33,6 +33,28 @@ func Report(db *gorm.DB, q *gin.Engine) {
 		detailReport := c.PostForm("detail_report")
 		proof, _ := c.FormFile("proof")
 
+		if proof == nil {
+			newReport := model.Report{
+				ID:           uuid.New(),
+				UserID:       id.(uuid.UUID),
+				Name:         name,
+				Address:      address,
+				Province:     province,
+				City:         city,
+				Phone:        phone,
+				DetailReport: detailReport,
+				Proof:        "",
+			}
+
+			if err := db.Create(&newReport).Error; err != nil {
+				utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			utils.HttpRespSuccess(c, http.StatusOK, "Success create new report", newReport)
+			return
+		}
+
 		filename := strings.ReplaceAll(strings.TrimSpace(proof.Filename), " ", "")
 		newFilename := randomID + "%20" + filename
 		proof.Filename = newFilename
